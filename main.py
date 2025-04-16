@@ -1,9 +1,13 @@
 from kivy.app import App
+from kivy.config import Config
 from data_handler import load_family_data
 from data_handler import save_family_data
 from tree_visualization import visualize_tree
 from ui import FamilyTreeUI
-import os
+
+# Увеличиваем размер окна в 2 раза (например, до 800x600)
+Config.set('graphics', 'width', 800)
+Config.set('graphics', 'height', 600)
 
 class FamilyTreeApp(App):
     def build(self):
@@ -13,10 +17,18 @@ class FamilyTreeApp(App):
         self.data = load_family_data()
 
         # Создаем UI
-        return FamilyTreeUI(
+        self.ui = FamilyTreeUI(
             add_member_callback=self.add_member,
             update_tree_callback=self.update_tree_visualization
         )
+
+        # Сохраняем ссылку на tree_image из UI
+        self.tree_image = self.ui.tree_image
+
+        # Обновляем визуализацию дерева сразу после запуска
+        self.update_tree_visualization()
+
+        return self.ui
 
     def add_member(self, fio, birthdate, parent_fio):
         """Добавляет нового члена семьи."""
@@ -29,14 +41,8 @@ class FamilyTreeApp(App):
 
     def update_tree_visualization(self):
         """Обновляет визуализацию дерева."""
-        visualize_tree(self.data, self.root.tree_label)
-
-def get_path(filename):
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    data_dir = os.path.join(script_dir, "data")  # Папка для данных
-    if not os.path.exists(data_dir):
-        os.makedirs(data_dir)  # Создаем папку, если её нет
-    return os.path.join(data_dir, filename)
+        print(f"Updating tree visualization with data: {self.data}")  # Отладочное сообщение
+        visualize_tree(self.data, self.tree_image)
 
 if __name__ == "__main__":
     FamilyTreeApp().run()

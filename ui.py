@@ -2,6 +2,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
 from kivy.uix.label import Label
+from kivy.uix.image import Image
 
 class FamilyTreeUI(BoxLayout):
     def __init__(self, add_member_callback, update_tree_callback, **kwargs):
@@ -24,10 +25,10 @@ class FamilyTreeUI(BoxLayout):
         self.input_layout.add_widget(self.add_button)
 
         # Виджет для отображения дерева
-        self.tree_label = Label(text="Семейное древо будет отображено здесь", size_hint=(1, 0.7))
+        self.tree_image = Image(source="", size_hint=(1, 0.7))
 
         self.add_widget(self.input_layout)
-        self.add_widget(self.tree_label)
+        self.add_widget(self.tree_image)
 
         # Колбэки
         self.add_member_callback = add_member_callback
@@ -40,12 +41,10 @@ class FamilyTreeUI(BoxLayout):
         parent_fio = self.parent_input.text.strip()
 
         if not fio or not birthdate:
-            self.tree_label.text = "Ошибка: Заполните ФИО и дату рождения."
+            self.tree_image.source = ""  # Очистить изображение
             return
 
         # Вызываем колбэк для добавления члена семьи
         self.add_member_callback(fio, birthdate, parent_fio)
-        self.tree_label.text = "Член семьи добавлен!"
-
-        # Обновляем визуализацию
+        self.tree_image.source = ""  # Очистить изображение перед обновлением
         self.update_tree_callback()
