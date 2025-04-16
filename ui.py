@@ -3,13 +3,22 @@ from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
 from kivy.uix.label import Label
 from kivy.uix.image import Image
+from kivy.core.window import Window
+from kivy.uix.filechooser import FileChooserIconView
+from kivy.uix.popup import Popup
+import os
 
 class FamilyTreeUI(BoxLayout):
-    def __init__(self, add_member_callback, update_tree_callback, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, add_member_callback, update_tree_callback, find_ancestor_callback, **kwargs):
+        super().__init__(**kwargs)  # Передаем только допустимые параметры Kivy
         self.orientation = "vertical"
         self.padding = 10
         self.spacing = 10
+
+        # Сохраняем пользовательские колбэки как атрибуты класса
+        self.add_member_callback = add_member_callback
+        self.update_tree_callback = update_tree_callback
+        self.find_ancestor_callback = find_ancestor_callback
 
         # Поле для ввода данных
         self.input_layout = BoxLayout(orientation="vertical", size_hint=(1, 0.3))
@@ -30,9 +39,9 @@ class FamilyTreeUI(BoxLayout):
         self.add_widget(self.input_layout)
         self.add_widget(self.tree_image)
 
-        # Колбэки
-        self.add_member_callback = add_member_callback
-        self.update_tree_callback = update_tree_callback
+        # Кнопка для изменения изображения узла
+        self.change_image_button = Button(text="Изменить изображение узла", on_press=self.open_file_chooser)
+        self.input_layout.add_widget(self.change_image_button)
 
     def on_add_button(self, instance):
         """Обработчик нажатия на кнопку добавления члена семьи."""
@@ -48,3 +57,15 @@ class FamilyTreeUI(BoxLayout):
         self.add_member_callback(fio, birthdate, parent_fio)
         self.tree_image.source = ""  # Очистить изображение перед обновлением
         self.update_tree_callback()
+
+    def open_file_chooser(self, instance):
+        """Открывает диалоговое окно для выбора изображения."""
+        content = FileChooserIconView(path=os.getcwd())
+        popup = Popup(title="Выберите изображение", content=content, size_hint=(0.9, 0.9))
+        content.bind(on_submit=lambda view, selection: self.load_image(selection[0], popup))
+        popup.open()
+
+    def load_image(self, path, popup):
+        """Загружает выбранное изображение."""
+        self.tree_image.source = path
+        popup.dismiss()

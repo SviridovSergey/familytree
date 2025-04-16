@@ -17,7 +17,17 @@ def load_family_data():
             content = file.read()
             if not content.strip():  # Если файл пустой
                 return []
-            return json.loads(content)
+            data = json.loads(content)
+
+            # Проверяем, что каждый элемент содержит необходимые поля
+            for member in data:
+                if "fio" not in member:
+                    raise ValueError(f"Отсутствует поле 'fio' для записи: {member}")
+                if "gender" not in member:
+                    print(f"Пол не указан для '{member['fio']}'. Установлено значение 'unknown'.")
+                    member["gender"] = "unknown"
+
+            return data
     except FileNotFoundError:
         # Если файл не найден, создаем его с пустым списком
         default_data = []
